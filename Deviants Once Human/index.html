@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta property="og:title" content="Bolt Texturas">
+  <meta property="og:description" content="O maior criador de texturas...">
+  <title>Gerenciador de Deviants</title>
+  <link rel="icon" href="img/icon.png">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #181818;
+      color: #ffffff;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+    h1 {
+      text-align: center;
+      color: #6e28a7;
+    }
+    .categoria {
+      background-color: #222;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 15px;
+    }
+    .select-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    select {
+      width: 80%;
+      padding: 10px;
+      background-color: #333;
+      color: white;
+      border: 1px solid #444;
+      border-radius: 4px;
+    }
+    .input-num {
+      width: 60px;
+      padding: 5px;
+      margin-left: 10px;
+      border-radius: 4px;
+      background-color: #333;
+      color: white;
+      border: 1px solid #444;
+    }
+    .input-search {
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
+      background-color: #333;
+      color: white;
+      border: 1px solid #444;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .suggestions {
+      background-color: #333;
+      color: white;
+      border: 1px solid #444;
+      border-radius: 4px;
+      max-height: 150px;
+      overflow-y: auto;
+      margin-top: 5px;
+      display: none;
+    }
+    .suggestions div {
+      padding: 8px;
+      cursor: pointer;
+    }
+    .suggestions div:hover {
+      background-color: #6e28a7;
+    }
+    .btn {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background-color: #6e28a7;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background-color: #491b7e;
+    }
+    .btn-download, .btn-pre-visualizar {
+      background-color: #4e4e4e;
+    }
+    .btn-download:hover, .btn-pre-visualizar:hover {
+      background-color: #313131;
+    }
+    .creditos {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .creditos a {
+      color: #6e28a7;
+      text-decoration: none;
+    }
+    .categoria + .categoria {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>
+    <span style="color: white;">Gerenciador de</span>
+    <span style="color: #6e28a7;">Deviants</span>
+  </h1>
+
+  <div id="categorias"></div>
+
+  <button class="btn" onclick="adicionarCategoria()">Adicionar Alt</button>
+  <button class="btn" onclick="removerUltimaCategoria()">Remover Alt</button>
+  <button class="btn btn-pre-visualizar" onclick="previsualizarArquivo()">Pré-Visualizar</button>
+  <button class="btn btn-download" onclick="salvarArquivo()">Download</button>
+
+  <div class="creditos">
+    <p><a href="https://www.youtube.com/@bolttexturas/">By bolttexturas</a></p>
+  </div>
+
+  <script>
+  let deviantList = [
+  "H37", "CÃO", "CUBO", "GATO", "ISQUEIRO", "PORTA", "ABELHA", "CEBOLA",
+  "COGUMELO", "REBECCA", "CASTOR", "BORBOLETA", "GELATINA", "SAPO SALTITANTE",
+  "DIGBY BOY", "ORBE RELÂMPAGO", "COELHO LETAL", "GEL PUTREFATO", "GLOBO DISCOTECA",
+  "BONECA DE PAPEL", "MINI MARAVILHA", "TOQUE DE ARTESÃO", "CASA DE GENGIBRE",
+  "DONZELA DESPEDAÇADA", "COELHO OBEDIENTE", "HOMEM DA CHUVA", "ENGUIA ELÉTRICA",
+  "QUEBRA-NOZES", "APANHADOR DE SONHOS", "ESSÊNCIA FLAMEJANTE", "BONECA VODU",
+  "SEMENTE DA COLHEITA", "MINI DEVORADOR", "MACACO FESTEIRO", "CHEFOSSAURO REX",
+  "DRAGÃO FLAMEJANTE", "CARACOL ATÔMICO", "À DERIVA",
+  "ZAP CAM", "GAZOCCHIO", "PANELA DE GELO", "PEIXE HIDRONAUTA",
+  "ESPÍRITO DA NEVE", "SOL INVENCÍVEL", "PUDIM DE ALCATRÃO",
+  "SR. WISH", "DR. TEDDY", "RADIANTE", "DRAGÃO AZURE", "CACHORRO BALÃO", "PONTO DE REAPARECIMENTO"
+  ];
+
+  deviantList.sort((a, b) => a.localeCompare(b));
+
+  let categorias = [{ nome: "PRINCIPAL", selecionadas: {} }];
+  let altCount = 0;
+
+  function renderizarCategorias() {
+    const container = document.getElementById("categorias");
+    container.innerHTML = "";
+    categorias.forEach((categoria, index) => {
+      let div = document.createElement("div");
+      div.classList.add("categoria");
+
+      let header = document.createElement("h2");
+
+      let spanNome = document.createElement("span");
+      spanNome.textContent = `${categoria.nome} 🖤`;
+      spanNome.style.cursor = "pointer";
+      spanNome.onclick = () => editarNomeCategoria(index, spanNome);
+
+      header.appendChild(spanNome);
+      div.appendChild(header);
+
+      let searchInput = document.createElement("input");
+      searchInput.type = "text";
+      searchInput.placeholder = "Pesquisar...";
+      searchInput.classList.add("input-search");
+      div.appendChild(searchInput);
+
+      let suggestionsContainer = document.createElement("div");
+      suggestionsContainer.classList.add("suggestions");
+      div.appendChild(suggestionsContainer);
+
+      let select = document.createElement("select");
+      deviantList.forEach(opcao => {
+        let option = document.createElement("option");
+        option.value = opcao;
+        option.textContent = opcao;
+        select.appendChild(option);
+      });
+
+      let inputNum = document.createElement("input");
+      inputNum.type = "number";
+      inputNum.value = 0;
+      inputNum.classList.add("input-num");
+      inputNum.min = 0;
+
+      let selecionarDiv = document.createElement("div");
+      selecionarDiv.classList.add("select-container");
+      selecionarDiv.appendChild(select);
+      selecionarDiv.appendChild(inputNum);
+
+      select.onchange = () => {
+        inputNum.value = categoria.selecionadas[select.value] || 0;
+      };
+
+      inputNum.onchange = () => {
+        categoria.selecionadas[select.value] = parseInt(inputNum.value) || 0;
+      };
+
+      searchInput.oninput = () => {
+        let searchTerm = searchInput.value.toLowerCase();
+        let filteredDeviants = deviantList.filter(opcao =>
+          opcao.toLowerCase().includes(searchTerm)
+        );
+
+        suggestionsContainer.innerHTML = "";
+        filteredDeviants.forEach(opcao => {
+          let div = document.createElement("div");
+          div.textContent = opcao;
+          div.onclick = () => {
+            select.value = opcao;
+            inputNum.value = categoria.selecionadas[opcao] || 0;
+            inputNum.focus();
+            suggestionsContainer.style.display = "none";
+          };
+          suggestionsContainer.appendChild(div);
+        });
+
+        suggestionsContainer.style.display = filteredDeviants.length ? "block" : "none";
+      };
+
+      document.addEventListener('click', function (e) {
+        if (!div.contains(e.target)) {
+          suggestionsContainer.style.display = 'none';
+        }
+      });
+
+      div.appendChild(selecionarDiv);
+      container.appendChild(div);
+    });
+  }
+
+  function editarNomeCategoria(index, spanNome) {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = categorias[index].nome;
+    input.style.width = "80%";
+
+    spanNome.replaceWith(input);
+    input.focus();
+
+    input.onblur = () => salvarNomeCategoria(index, input, spanNome);
+    input.onkeypress = (e) => {
+      if (e.key === "Enter") salvarNomeCategoria(index, input, spanNome);
+    };
+  }
+
+  function salvarNomeCategoria(index, input, spanNome) {
+    categorias[index].nome = input.value.trim() || categorias[index].nome;
+    spanNome.textContent = `${categorias[index].nome} 🖤`;
+    spanNome.onclick = () => editarNomeCategoria(index, spanNome);
+    input.replaceWith(spanNome);
+  }
+
+  function adicionarCategoria() {
+    if (altCount < 9) {
+      altCount++;
+      categorias.push({ nome: `ALT 0${altCount}`, selecionadas: {} });
+      renderizarCategorias();
+    }
+  }
+
+  function removerUltimaCategoria() {
+    if (categorias.length > 1) {
+      categorias.pop();
+      altCount--;
+      renderizarCategorias();
+    }
+  }
+
+  function salvarArquivo() {
+    let conteudo = categorias.map(cat => {
+      let total = Object.values(cat.selecionadas).reduce((a, b) => a + b, 0);
+      let opcoesTexto = Object.keys(cat.selecionadas)
+        .map(op => `${op} (${cat.selecionadas[op]})`)
+        .join("\n");
+
+      return `==========================\n     🖤 ${cat.nome}\n\n${opcoesTexto}\n\n     🖤 TOTAL = ${total}\n==========================`;
+    }).join("\n\n");
+
+    let blob = new Blob([conteudo], { type: "text/plain" });
+    let link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "deviants.txt";
+    link.click();
+  }
+
+  function previsualizarArquivo() {
+    let conteudo = categorias.map(cat => {
+      let total = Object.values(cat.selecionadas).reduce((a, b) => a + b, 0);
+      let opcoesTexto = Object.keys(cat.selecionadas)
+        .map(op => `${op} (${cat.selecionadas[op]})`)
+        .join("\n");
+
+      return `==========================\n     🖤 ${cat.nome}\n\n${opcoesTexto}\n\n     🖤 TOTAL = ${total}\n==========================`;
+    }).join("\n\n");
+
+    let novaJanela = window.open("", "_blank");
+    novaJanela.document.write("<pre>" + conteudo + "</pre>");
+  }
+
+  renderizarCategorias();
+  </script>
+
+</body>
+</html>
